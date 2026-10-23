@@ -53,7 +53,7 @@ public class DatabaseConnection {
                     "delivery_address TEXT, " +
                     "total_amount REAL NOT NULL DEFAULT 0, " +
                     "order_status TEXT NOT NULL DEFAULT 'Processing', " +
-                    "FOREIGN KEY (user_id) REFERENCES Users(user_id))");
+                    "FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE)");
 
             stmt.execute("CREATE TABLE IF NOT EXISTS OrderItems (" +
                     "order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -61,8 +61,8 @@ public class DatabaseConnection {
                     "item_id INTEGER NOT NULL, " +
                     "quantity INTEGER NOT NULL, " +
                     "subtotal REAL NOT NULL, " +
-                    "FOREIGN KEY (order_id) REFERENCES DistributionOrders(order_id), " +
-                    "FOREIGN KEY (item_id) REFERENCES FurnitureItems(item_id))");
+                    "FOREIGN KEY (order_id) REFERENCES DistributionOrders(order_id) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (item_id) REFERENCES FurnitureItems(item_id) ON DELETE CASCADE)");
 
             stmt.execute("CREATE TABLE IF NOT EXISTS ActivityLogs (" +
                     "log_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -71,7 +71,7 @@ public class DatabaseConnection {
                     "target_id INTEGER NOT NULL, " +
                     "description TEXT NOT NULL, " +
                     "timestamp TEXT NOT NULL, " +
-                    "FOREIGN KEY (user_id) REFERENCES Users(user_id))");
+                    "FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE)");
         }
     }
 }
