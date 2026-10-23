@@ -96,7 +96,7 @@ public class Main {
         String role;
         switch (roleChoice) {
             case "1":
-                role = "ADMIN";1
+                role = "ADMIN";
                 break;
             case "2":
                 role = "Warehouse Staff";
