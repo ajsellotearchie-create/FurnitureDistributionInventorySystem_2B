@@ -10,8 +10,10 @@ import java.sql.SQLException;
 public class UserDao {
 
     public boolean registerUser(String username, String password, String fullName, String role) {
-        // Automatically set status to 'pending' upon registration
-        String sql = "INSERT INTO Users(username, password, full_name, roles, status) VALUES(?, ?, ?, ?, 'pending')";
+        // Check if the role is admin; if so, set status to 'active', otherwise 'pending'
+        String status = role.equalsIgnoreCase("admin") ? "active" : "pending";
+
+        String sql = "INSERT INTO Users(username, password, full_name, roles, status) VALUES(?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -20,8 +22,14 @@ public class UserDao {
             pstmt.setString(2, password);
             pstmt.setString(3, fullName);
             pstmt.setString(4, role.toLowerCase());
+            pstmt.setString(5, status);
             pstmt.executeUpdate();
-            System.out.println("Registration successful. Your account is pending admin approval.");
+
+            if (status.equalsIgnoreCase("active")) {
+                System.out.println("Registration successful. Your Admin account is active and ready to log in.");
+            } else {
+                System.out.println("Registration successful. Your account is pending admin approval.");
+            }
             return true;
 
         } catch (SQLException e) {
@@ -30,7 +38,7 @@ public class UserDao {
         }
     }
 
-    // Returns the User if credentials match and account is approved, otherwise null
+    // Returns the User if credentials match and account is approved/active, otherwise null
     public User login(String username, String password) {
         String sql = "SELECT user_id, username, password, full_name, roles, status " +
                 "FROM Users WHERE username = ? AND password = ?";
