@@ -38,7 +38,12 @@ public class AdminMenu {
 
             switch (sc.nextLine().trim()) {
                 case "1" -> manageFurniture();
-                case "2" -> manageUsers();
+                case "2" -> {
+                    // If manageUsers returns true, it means the admin deleted their own account and we need to log out
+                    if (manageUsers()) {
+                        loggedIn = false;
+                    }
+                }
                 case "3" -> viewReports();
                 case "4" -> {
                     logDao.log(user.user_id(), "LOGOUT", user.user_id(), user.username() + " logged out");
@@ -147,7 +152,7 @@ public class AdminMenu {
 
     // ---------------- Manage Users ----------------
 
-    private void manageUsers() {
+    private boolean manageUsers() {
         boolean back = false;
         while (!back) {
             System.out.println("=============================");
@@ -163,12 +168,17 @@ public class AdminMenu {
                 case "1" -> printUsers();
                 case "2" -> approvePendingUsers();
                 case "3" -> changeRole();
-                case "4" -> deleteUser();
+                case "4" -> {
+                    if (deleteUser()) {
+                        return true; // Signal back to show() that the user deleted themselves and needs to log out
+                    }
+                }
                 case "5" -> back = true;
                 default -> System.out.println("Invalid option.");
             }
         }
         System.out.println();
+        return false;
     }
 
     private void printUsers() {
@@ -236,23 +246,29 @@ public class AdminMenu {
         }
     }
 
-    private void deleteUser() {
+    private boolean deleteUser() {
         int id = readInt("User ID to delete: ");
-        if (id == user.user_id()) {
-            System.out.println("You cannot delete your own account.\n");
-            return;
-        }
+
         System.out.print("Delete user #" + id + "? (y/n): ");
         if (!sc.nextLine().trim().equalsIgnoreCase("y")) {
             System.out.println("Cancelled.\n");
-            return;
+            return false;
         }
+
+        boolean isSelf = (id == user.user_id());
+
         if (userAdminDao.deleteUser(id)) {
             logDao.log(user.user_id(), "DELETE_USER", id, "Deleted user #" + id);
             System.out.println("User deleted successfully.\n");
+
+            if (isSelf) {
+                System.out.println("You have deleted your own account. Logging out...\n");
+                return true; // Triggers logout flow
+            }
         } else {
             System.out.println("User not found or cannot be deleted (user may have logs/orders).\n");
         }
+        return false;
     }
 
     // ---------------- View Reports ----------------
