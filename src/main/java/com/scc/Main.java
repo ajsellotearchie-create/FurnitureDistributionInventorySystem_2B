@@ -1,6 +1,6 @@
 package com.scc;
 
-import com.scc.doa.UserDao;
+import com.scc.dao.UserDao;
 import com.scc.model.User;
 import com.scc.ui.AdminMenu;
 import com.scc.ui.WarehouseMenu;
@@ -96,7 +96,7 @@ public class Main {
         String role;
         switch (roleChoice) {
             case "1":
-                role = "ADMIN";
+                role = "ADMIN";1
                 break;
             case "2":
                 role = "Warehouse Staff";

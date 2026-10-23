@@ -1,4 +1,4 @@
-package com.scc.doa;
+package com.scc.dao;
 
 import com.scc.model.User;
 
@@ -10,7 +10,8 @@ import java.sql.SQLException;
 public class UserDao {
 
     public boolean registerUser(String username, String password, String fullName, String role) {
-        String sql = "INSERT INTO Users(username, password, full_name, roles) VALUES(?, ?, ?, ?)";
+        // Automatically set status to 'pending' upon registration
+        String sql = "INSERT INTO Users(username, password, full_name, roles, status) VALUES(?, ?, ?, ?, 'pending')";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -20,7 +21,7 @@ public class UserDao {
             pstmt.setString(3, fullName);
             pstmt.setString(4, role.toLowerCase());
             pstmt.executeUpdate();
-            System.out.println("Registration successful.");
+            System.out.println("Registration successful. Your account is pending admin approval.");
             return true;
 
         } catch (SQLException e) {
@@ -29,9 +30,9 @@ public class UserDao {
         }
     }
 
-    // Returns the User if username/password match, otherwise null
+    // Returns the User if credentials match and account is approved, otherwise null
     public User login(String username, String password) {
-        String sql = "SELECT user_id, username, password, full_name, roles " +
+        String sql = "SELECT user_id, username, password, full_name, roles, status " +
                 "FROM Users WHERE username = ? AND password = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -42,12 +43,21 @@ public class UserDao {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
+                    String status = rs.getString("status");
+
+                    // Check if account is still pending approval
+                    if (status != null && status.equalsIgnoreCase("pending")) {
+                        System.out.println("Login failed: Your account is pending admin approval.\n");
+                        return null;
+                    }
+
                     return new User(
                             rs.getInt("user_id"),
                             rs.getString("username"),
                             rs.getString("password"),
                             rs.getString("full_name"),
-                            rs.getString("roles"));
+                            rs.getString("roles"),
+                            status);
                 }
             }
         } catch (SQLException e) {
@@ -55,5 +65,4 @@ public class UserDao {
         }
         return null;
     }
-
 }

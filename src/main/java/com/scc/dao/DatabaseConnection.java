@@ -1,4 +1,4 @@
-package com.scc.doa;
+package com.scc.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,7 +33,8 @@ public class DatabaseConnection {
                     "username TEXT UNIQUE NOT NULL, " +
                     "password TEXT NOT NULL, " +
                     "full_name TEXT NOT NULL, " +
-                    "roles TEXT NOT NULL)");
+                    "roles TEXT NOT NULL," +
+                    "status TEXT NOT NULL)");
 
             stmt.execute("CREATE TABLE IF NOT EXISTS FurnitureItems (" +
                     "item_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -62,6 +63,15 @@ public class DatabaseConnection {
                     "subtotal REAL NOT NULL, " +
                     "FOREIGN KEY (order_id) REFERENCES DistributionOrders(order_id), " +
                     "FOREIGN KEY (item_id) REFERENCES FurnitureItems(item_id))");
+
+            stmt.execute("CREATE TABLE IF NOT EXISTS ActivityLogs (" +
+                    "log_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "user_id INTEGER NOT NULL, " +
+                    "event_type TEXT NOT NULL, " +
+                    "target_id INTEGER NOT NULL, " +
+                    "description TEXT NOT NULL, " +
+                    "timestamp TEXT NOT NULL, " +
+                    "FOREIGN KEY (user_id) REFERENCES Users(user_id))");
         }
     }
 }
